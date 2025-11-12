@@ -150,37 +150,7 @@ const LuxuryVillaHero = () => {
         }
       });
 
-      // FIXED: img2 smoothly reverses to entrance position on scroll
-      gsap.to(img2LayerRef.current, {
-        x: -200,
-        y: -200,
-        rotation: -90,
-        scale: 0.3,
-        opacity: 0,
-        ease: 'back.in(1.5)',
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: 1.8
-        }
-      });
-
-      // FIXED: img3 smoothly reverses to entrance position on scroll
-      gsap.to(img3LayerRef.current, {
-        x: 200,
-        y: 200,
-        rotation: 90,
-        scale: 0.3,
-        opacity: 0,
-        ease: 'back.in(1.5)',
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: 1.8
-        }
-      });
+      // REMOVED scroll animations for img2 and img3 - they now just float continuously
 
       // Content zoom out and fade
       gsap.to(centerRevealRef.current, {
@@ -195,17 +165,27 @@ const LuxuryVillaHero = () => {
         }
       });
 
-      // Number counter animation
-      gsap.to(numberRef.current, {
-        rotation: 360,
-        scale: 1.5,
-        opacity: 0,
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: 1
-        }
+      // REMOVED scroll animation for number - it stays visible
+
+      // Continuous floating animation for img2
+      gsap.to(img2LayerRef.current, {
+        y: '+=30',
+        rotation: '+=5',
+        duration: 4,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut'
+      });
+
+      // Continuous floating animation for img3
+      gsap.to(img3LayerRef.current, {
+        y: '+=25',
+        rotation: '-=5',
+        duration: 3.5,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+        delay: 0.5
       });
 
       // Continuous floating animation for feature cards
@@ -250,7 +230,7 @@ const LuxuryVillaHero = () => {
         rotation: mousePos.x * 10,
         duration: 2,
         ease: 'power2.out',
-        overwrite: false
+        overwrite: 'auto'
       });
 
       gsap.to(img3LayerRef.current, {
@@ -259,21 +239,21 @@ const LuxuryVillaHero = () => {
         rotation: mousePos.x * -10,
         duration: 2.2,
         ease: 'power2.out',
-        overwrite: false
+        overwrite: 'auto'
       });
 
       gsap.to(leftPanelRef.current, {
         x: mousePos.x * -30,
         duration: 1.8,
         ease: 'power2.out',
-        overwrite: false
+        overwrite: 'auto'
       });
 
       gsap.to(rightPanelRef.current, {
         x: mousePos.x * 30,
         duration: 1.8,
         ease: 'power2.out',
-        overwrite: false
+        overwrite: 'auto'
       });
     }
   }, [mousePos]);

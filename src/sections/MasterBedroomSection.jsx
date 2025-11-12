@@ -18,6 +18,7 @@ const MasterBedroomSection = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isAnimating, setIsAnimating] = useState(false);
+  const [hasAnimated, setHasAnimated] = useState(false);
 
   // Combined images array with your imports and Unsplash images
   const images = [
@@ -88,116 +89,135 @@ const MasterBedroomSection = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // UNIQUE APPROACH: Horizontal sliding reveal
+      // Set initial states (hidden)
+      gsap.set(imageRefs.current.slice(0, 3), {
+        x: '100vw',
+        rotation: 45,
+        scale: 0.5
+      });
+      
+      gsap.set(imageRefs.current.slice(3, 6), {
+        x: '-100vw',
+        rotation: -45,
+        scale: 0.5
+      });
+      
+      gsap.set(imageRefs.current.slice(6), {
+        x: '100vw',
+        rotation: 45,
+        scale: 0.5,
+        opacity: 0
+      });
+      
+      gsap.set(sidebarRef.current, {
+        x: -400,
+        opacity: 0
+      });
+      
+      gsap.set(numberRef.current, {
+        scale: 0,
+        rotation: 720
+      });
+      
+      gsap.set(titleWordRefs.current, {
+        y: 150,
+        opacity: 0,
+        rotationX: 90
+      });
+      
+      gsap.set(descRef.current, {
+        x: -100,
+        opacity: 0
+      });
+      
+      gsap.set(statsRef.current.children, {
+        scale: 0,
+        opacity: 0
+      });
+      
+      gsap.set(exploreRef.current, {
+        y: 100,
+        opacity: 0
+      });
+
+      // ENTRANCE ANIMATION - Triggers at 50% scroll into section
       const entranceTL = gsap.timeline({
-        defaults: { ease: 'power4.inOut' }
+        defaults: { ease: 'power4.inOut' },
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top 70%', // Animation starts when top of section reaches 50% of viewport
+          once: true, // Only play once, never reverse
+          onEnter: () => setHasAnimated(true)
+        }
       });
 
       // Images slide in from right in sequence
       entranceTL
-        .from(imageRefs.current.slice(0, 3), {
-          x: '100vw',
-          rotation: 45,
-          scale: 0.5,
+        .to(imageRefs.current.slice(0, 3), {
+          x: 0,
+          rotation: 0,
+          scale: 1,
           duration: 1.8,
           stagger: 0.15
         })
-        .from(imageRefs.current.slice(3, 6), {
-          x: '-100vw',
-          rotation: -45,
-          scale: 0.5,
+        .to(imageRefs.current.slice(3, 6), {
+          x: 0,
+          rotation: 0,
+          scale: 1,
           duration: 1.8,
           stagger: 0.15
         }, '-=1.5')
-        .from(imageRefs.current.slice(6), {
-          x: '100vw',
-          rotation: 45,
-          scale: 0.5,
-          opacity: 0,
+        .to(imageRefs.current.slice(6), {
+          x: 0,
+          rotation: 0,
+          scale: 1,
+          opacity: 1,
           duration: 1.8,
           stagger: 0.1
         }, '-=1.2')
-        .from(sidebarRef.current, {
-          x: -400,
-          opacity: 0,
+        .to(sidebarRef.current, {
+          x: 0,
+          opacity: 1,
           duration: 1.5
         }, '-=1.2')
-        .from(numberRef.current, {
-          scale: 0,
-          rotation: 720,
+        .to(numberRef.current, {
+          scale: 1,
+          rotation: 0,
           duration: 1.2,
           ease: 'back.out(2)'
         }, '-=0.8')
-        .from(titleWordRefs.current, {
-          y: 150,
-          opacity: 0,
-          rotationX: 90,
+        .to(titleWordRefs.current, {
+          y: 0,
+          opacity: 1,
+          rotationX: 0,
           stagger: 0.1,
           duration: 1
         }, '-=0.8')
-        .from(descRef.current, {
-          x: -100,
-          opacity: 0,
+        .to(descRef.current, {
+          x: 0,
+          opacity: 1,
           duration: 0.8
         }, '-=0.4')
-        .from(statsRef.current.children, {
-          scale: 0,
-          opacity: 0,
+        .to(statsRef.current.children, {
+          scale: 1,
+          opacity: 1,
           stagger: 0.1,
           duration: 0.6,
           ease: 'back.out(2)'
         }, '-=0.4')
-        .from(exploreRef.current, {
-          y: 100,
-          opacity: 0,
+        .to(exploreRef.current, {
+          y: 0,
+          opacity: 1,
           duration: 0.8
         }, '-=0.3');
 
-      // UNIQUE PARALLAX: Depth-based 3D rotation on scroll
-      gsap.to(imageCarousel.current, {
-        rotationY: -25,
-        x: -300,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: 2
-        }
-      });
-
-      // Individual image parallax with 3D transforms
-      imageRefs.current.forEach((img, i) => {
-        gsap.to(img, {
-          x: -400 + (i * 100),
-          y: -200 + (i * 20),
-          rotationZ: -15 + (i * 5),
-          scale: 0.7 + (i * 0.03),
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: 1.5 + (i * 0.1)
-          }
-        });
-      });
-
-      gsap.to(sidebarRef.current, {
-        y: -400,
-        opacity: 0.3,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: 1
-        }
-      });
-
-      // Continuous rotation animation for carousel
+      // Continuous subtle rotation animation for carousel (only after entrance)
       gsap.to(imageCarousel.current, {
         rotationY: '+=5',
         duration: 20,
         repeat: -1,
-        ease: 'none'
+        ease: 'none',
+        delay: 2 // Start after entrance animation
       });
 
     }, sectionRef);
@@ -218,13 +238,15 @@ const MasterBedroomSection = () => {
   }, []);
 
   useEffect(() => {
-    gsap.to(imageCarousel.current, {
-      rotationY: mousePos.x * 15,
-      rotationX: mousePos.y * -10,
-      duration: 2,
-      ease: 'power2.out'
-    });
-  }, [mousePos]);
+    if (hasAnimated) {
+      gsap.to(imageCarousel.current, {
+        rotationY: mousePos.x * 15,
+        rotationX: mousePos.y * -10,
+        duration: 2,
+        ease: 'power2.out'
+      });
+    }
+  }, [mousePos, hasAnimated]);
 
   return (
     <section 
@@ -243,7 +265,7 @@ const MasterBedroomSection = () => {
         {/* Big Number */}
         <div
           ref={numberRef}
-          className="text-[180px] md:text-[240px] lg:text-[300px] font-black leading-none mb-8 opacity-10"
+          className="text-[120px] md:text-[160px] lg:text-[200px] font-black leading-none mb-6 opacity-10"
           style={{
             background: 'linear-gradient(135deg, #a78bfa 0%, #ec4899 100%)',
             WebkitBackgroundClip: 'text',
@@ -254,12 +276,12 @@ const MasterBedroomSection = () => {
         </div>
 
         {/* Title with Split Animation */}
-        <h1 className="mb-8 space-y-2 perspective-1000">
+        <h1 className="mb-6 space-y-1 perspective-1000">
           {['MASTER', 'BEDROOM', 'SUITE'].map((word, i) => (
             <div
               key={i}
               ref={el => titleWordRefs.current[i] = el}
-              className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight"
+              className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tight"
               style={{
                 color: i === 1 ? 'transparent' : 'white',
                 background: i === 1 ? 'linear-gradient(135deg, #a78bfa 0%, #ec4899 100%)' : 'none',
@@ -276,13 +298,13 @@ const MasterBedroomSection = () => {
         {/* Description */}
         <p
           ref={descRef}
-          className="text-gray-400 text-lg md:text-xl lg:text-2xl leading-relaxed mb-12 max-w-xl"
+          className="text-gray-400 text-base md:text-lg lg:text-xl leading-relaxed mb-8 max-w-lg"
         >
           Experience luxury redefined. Where contemporary design meets ultimate comfort in your private sanctuary.
         </p>
 
         {/* Stats Grid */}
-        <div ref={statsRef} className="grid grid-cols-2 gap-6 mb-12 max-w-md">
+        <div ref={statsRef} className="grid grid-cols-2 gap-4 mb-8 max-w-sm">
           {[
             { value: '450', label: 'SQ FT' },
             { value: '12ft', label: 'CEILING' },
@@ -291,20 +313,20 @@ const MasterBedroomSection = () => {
           ].map((stat, i) => (
             <div
               key={i}
-              className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all"
+              className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-all"
             >
-              <div className="text-3xl md:text-4xl font-bold text-purple-400 mb-2">{stat.value}</div>
-              <div className="text-gray-500 text-sm tracking-widest">{stat.label}</div>
+              <div className="text-2xl md:text-3xl font-bold text-purple-400 mb-1">{stat.value}</div>
+              <div className="text-gray-500 text-xs tracking-widest">{stat.label}</div>
             </div>
           ))}
         </div>
 
         {/* CTA */}
         <div ref={exploreRef}>
-          <button className="group relative px-10 py-5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-white font-semibold text-lg overflow-hidden transition-all hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/50">
+          <button className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-white font-semibold text-base overflow-hidden transition-all hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/50">
             <span className="relative z-10 flex items-center gap-3">
               EXPLORE ROOM
-              <svg className="w-6 h-6 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </span>
@@ -337,8 +359,8 @@ const MasterBedroomSection = () => {
                   : 'border-white/20 cursor-pointer hover:border-purple-400/60'
               }`}
               style={{
-                width: positionInOrder <= 2 ? '480px' : '380px',
-                height: positionInOrder <= 2 ? '620px' : '500px',
+                width: positionInOrder <= 2 ? '400px' : '320px',
+                height: positionInOrder <= 2 ? '520px' : '420px',
                 transform: `translateZ(${zLayers[positionInOrder]}px) translateX(${xPositions[positionInOrder]}px) rotateY(${rotations[positionInOrder]}deg) scale(${scales[positionInOrder]})`,
                 transformStyle: 'preserve-3d',
                 boxShadow: isCenter 
@@ -374,8 +396,8 @@ const MasterBedroomSection = () => {
       </div>
 
       {/* Decorative Elements */}
-      <div className="absolute top-20 right-20 w-40 h-40 border border-purple-500/30 rounded-full animate-pulse" />
-      <div className="absolute bottom-32 left-1/2 w-60 h-60 border border-pink-500/20 rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="absolute top-20 right-20 w-32 h-32 border border-purple-500/30 rounded-full animate-pulse" />
+      <div className="absolute bottom-32 left-1/2 w-48 h-48 border border-pink-500/20 rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30">
